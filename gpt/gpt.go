@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/qingconglaixueit/wechatbot/config"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/qingconglaixueit/wechatbot/config"
+	"github.com/qingconglaixueit/wechatbot/pkg/logger"
 )
 
-const BASEURL = "https://api.openai.com/v1/"
+//const BASEURL = "https://api.openai.com/v1/chat/"
 
 // ChatGPTResponseBody 请求体
 type ChatGPTResponseBody struct {
@@ -25,34 +26,75 @@ type ChatGPTResponseBody struct {
 	Usage   map[string]interface{} `json:"usage"`
 }
 
+// GPT Response
+//	{
+//	 "id": "chatcmpl-123",
+//	 "object": "chat.completion",
+//	 "created": 1677652288,
+//	 "choices": [{
+//	   "index": 0,
+//	   "message": {
+//	     "role": "assistant",
+//	     "content": "\n\nHello there, how may I assist you today?",
+//	   },
+//	   "finish_reason": "stop"
+//	 }],
+//	 "usage": {
+//	   "prompt_tokens": 9,
+//	   "completion_tokens": 12,
+//	   "total_tokens": 21
+//	 }
+//	}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
 type ChoiceItem struct {
-	Text         string `json:"text"`
-	Index        int    `json:"index"`
-	Logprobs     int    `json:"logprobs"`
-	FinishReason string `json:"finish_reason"`
+	Message      Message `json:"message"`
+	FinishReason string  `json:"finish_reason"`
+	Index        int     `json:"index"`
+}
+
+type Messages struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 // ChatGPTRequestBody 响应体
 type ChatGPTRequestBody struct {
-	Model            string  `json:"model"`
-	Prompt           string  `json:"prompt"`
-	MaxTokens        uint    `json:"max_tokens"`
-	Temperature      float64 `json:"temperature"`
-	TopP             int     `json:"top_p"`
-	FrequencyPenalty int     `json:"frequency_penalty"`
-	PresencePenalty  int     `json:"presence_penalty"`
+	Model            string     `json:"model"`
+	Prompt           []Messages `json:"messages"`
+	MaxTokens        uint       `json:"max_tokens"`
+	Temperature      float64    `json:"temperature"`
+	TopP             int        `json:"top_p"`
+	FrequencyPenalty int        `json:"frequency_penalty"`
+	PresencePenalty  int        `json:"presence_penalty"`
 }
 
-// Completions gtp文本模型回复
-//curl https://api.openai.com/v1/completions
-//-H "Content-Type: application/json"
-//-H "Authorization: Bearer your chatGPT key"
-//-d '{"model": "text-davinci-003", "prompt": "give me good song", "temperature": 0, "max_tokens": 7}'
+// Completions GPT request
+// https://platform.openai.com/docs/api-reference/chat/create?lang=curl
+//
+//	curl https://api.openai.com/v1/chat/completions \
+//	 -H 'Content-Type: application/json' \
+//	 -H 'Authorization: Bearer YOUR_API_KEY' \
+//	 -d '{
+//	 "model": "gpt-3.5-turbo",
+//	 "messages": [{"role": "user", "content": "Hello!"}]
+//	}'
+//
+// Parameters
+//
+//	{
+//	 "model": "gpt-3.5-turbo",
+//	 "messages": [{"role": "user", "content": "Hello!"}]
+//	}
 func Completions(msg string) (string, error) {
 	cfg := config.LoadConfig()
+	promt := Messages{Role: "user", Content: msg}
 	requestBody := ChatGPTRequestBody{
 		Model:            cfg.Model,
-		Prompt:           msg,
+		Prompt:           []Messages{promt},
 		MaxTokens:        cfg.MaxTokens,
 		Temperature:      cfg.Temperature,
 		TopP:             1,
@@ -65,7 +107,7 @@ func Completions(msg string) (string, error) {
 		return "", err
 	}
 	logger.Info(fmt.Sprintf("request gpt json string : %v", string(requestData)))
-	req, err := http.NewRequest("POST", BASEURL+"completions", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", cfg.API+"completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
 	}
@@ -80,10 +122,10 @@ func Completions(msg string) (string, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode != 200 {
-		body, _ := ioutil.ReadAll(response.Body)
+		body, _ := io.ReadAll(response.Body)
 		return "", errors.New(fmt.Sprintf("请求GTP出错了，gpt api status code not equals 200,code is %d ,details:  %v ", response.StatusCode, string(body)))
 	}
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", err
 	}
@@ -98,7 +140,7 @@ func Completions(msg string) (string, error) {
 
 	var reply string
 	if len(gptResponseBody.Choices) > 0 {
-		reply = gptResponseBody.Choices[0].Text
+		reply = gptResponseBody.Choices[0].Message.Content
 	}
 	logger.Info(fmt.Sprintf("gpt response text: %s ", reply))
 	return reply, nil
