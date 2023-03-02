@@ -3,15 +3,14 @@ package gpt
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/qingconglaixueit/wechatbot/config"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
+	"github.com/lushenle/wechatbot/config"
+	"github.com/lushenle/wechatbot/pkg/logger"
 )
 
 //const BASEURL = "https://api.openai.com/v1/chat/"
@@ -46,30 +45,26 @@ type ChatGPTResponseBody struct {
 //	 }
 //	}
 
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
 type ChoiceItem struct {
 	Message      Message `json:"message"`
 	FinishReason string  `json:"finish_reason"`
 	Index        int     `json:"index"`
 }
 
-type Messages struct {
+type Message struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
 // ChatGPTRequestBody 响应体
 type ChatGPTRequestBody struct {
-	Model            string     `json:"model"`
-	Prompt           []Messages `json:"messages"`
-	MaxTokens        uint       `json:"max_tokens"`
-	Temperature      float64    `json:"temperature"`
-	TopP             int        `json:"top_p"`
-	FrequencyPenalty int        `json:"frequency_penalty"`
-	PresencePenalty  int        `json:"presence_penalty"`
+	Model            string    `json:"model"`
+	Prompt           []Message `json:"messages"`
+	MaxTokens        uint      `json:"max_tokens"`
+	Temperature      float64   `json:"temperature"`
+	TopP             int       `json:"top_p"`
+	FrequencyPenalty int       `json:"frequency_penalty"`
+	PresencePenalty  int       `json:"presence_penalty"`
 }
 
 // Completions GPT request
@@ -91,10 +86,10 @@ type ChatGPTRequestBody struct {
 //	}
 func Completions(msg string) (string, error) {
 	cfg := config.LoadConfig()
-	promt := Messages{Role: "user", Content: msg}
+	promt := Message{Role: "user", Content: msg}
 	requestBody := ChatGPTRequestBody{
 		Model:            cfg.Model,
-		Prompt:           []Messages{promt},
+		Prompt:           []Message{promt},
 		MaxTokens:        cfg.MaxTokens,
 		Temperature:      cfg.Temperature,
 		TopP:             1,
@@ -123,7 +118,7 @@ func Completions(msg string) (string, error) {
 	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		body, _ := io.ReadAll(response.Body)
-		return "", errors.New(fmt.Sprintf("请求GTP出错了，gpt api status code not equals 200,code is %d ,details:  %v ", response.StatusCode, string(body)))
+		return "", fmt.Errorf("请求GTP出错了，gpt api status code not equals 200,code is %d ,details:  %v ", response.StatusCode, string(body))
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {

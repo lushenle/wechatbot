@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/eatmoreapple/openwechat"
+	"github.com/lushenle/wechatbot/config"
+	"github.com/lushenle/wechatbot/pkg/logger"
 	"github.com/patrickmn/go-cache"
-	"github.com/qingconglaixueit/wechatbot/config"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
 	"github.com/skip2/go-qrcode"
 )
 

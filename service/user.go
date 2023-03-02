@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/eatmoreapple/openwechat"
+	"github.com/lushenle/wechatbot/config"
 	"github.com/patrickmn/go-cache"
-	"github.com/qingconglaixueit/wechatbot/config"
 )
 
 // UserServiceInterface 用户业务接口

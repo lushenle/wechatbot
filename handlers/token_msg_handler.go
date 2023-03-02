@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
-	"github.com/qingconglaixueit/wechatbot/service"
+
 	"github.com/eatmoreapple/openwechat"
+	"github.com/lushenle/wechatbot/pkg/logger"
+	"github.com/lushenle/wechatbot/service"
 )
 
 var _ MessageHandlerInterface = (*TokenMessageHandler)(nil)
@@ -46,6 +47,10 @@ func NewTokenMessageHandler(msg *openwechat.Message) (MessageHandlerInterface, e
 	if msg.IsComeFromGroup() {
 		sender, err = msg.SenderInGroup()
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	userService := service.NewUserService(c, sender)
 	handler := &TokenMessageHandler{
 		msg:     msg,

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
+	"github.com/lushenle/wechatbot/pkg/logger"
 )
 
 // Configuration 项目配置
