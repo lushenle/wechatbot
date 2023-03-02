@@ -21,6 +21,10 @@ FROM frolvlad/alpine-glibc:alpine-3.17_glibc-2.34 as final
 
 WORKDIR /app
 
+# Install some software
+RUN apk update && apk add --no-cache bash supervisor
+
+# Copy the binary file from builder
 COPY --from=builder /app/wechatbot .
 ADD supervisord.conf /etc/supervisord.conf
 
