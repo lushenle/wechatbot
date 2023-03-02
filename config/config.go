@@ -3,16 +3,19 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
 	"log"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/qingconglaixueit/wechatbot/pkg/logger"
 )
 
 // Configuration 项目配置
 type Configuration struct {
+	// api addr
+	API string `json:"api"`
 	// gpt apikey
 	ApiKey string `json:"api_key"`
 	// 自动通过好友
@@ -64,7 +67,8 @@ func LoadConfig() *Configuration {
 			}
 		}
 		// 有环境变量使用环境变量
-		ApiKey := os.Getenv("APIKEY")
+		Api := os.Getenv("APIKEY")
+		ApiKey := os.Getenv("API")
 		AutoPass := os.Getenv("AUTO_PASS")
 		SessionTimeout := os.Getenv("SESSION_TIMEOUT")
 		Model := os.Getenv("MODEL")
@@ -72,6 +76,9 @@ func LoadConfig() *Configuration {
 		Temperature := os.Getenv("TEMPREATURE")
 		ReplyPrefix := os.Getenv("REPLY_PREFIX")
 		SessionClearToken := os.Getenv("SESSION_CLEAR_TOKEN")
+		if Api != "" {
+			config.API = Api
+		}
 		if ApiKey != "" {
 			config.ApiKey = ApiKey
 		}
