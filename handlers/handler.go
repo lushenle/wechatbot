@@ -2,15 +2,16 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/qingconglaixueit/wechatbot/config"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
-	"github.com/eatmoreapple/openwechat"
-	"github.com/patrickmn/go-cache"
-	"github.com/skip2/go-qrcode"
 	"log"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/eatmoreapple/openwechat"
+	"github.com/patrickmn/go-cache"
+	"github.com/qingconglaixueit/wechatbot/config"
+	"github.com/qingconglaixueit/wechatbot/pkg/logger"
+	"github.com/skip2/go-qrcode"
 )
 
 var c = cache.New(config.LoadConfig().SessionTimeout, time.Minute*5)
@@ -47,6 +48,8 @@ func NewHandler() (msgFunc func(msg *openwechat.Message), err error) {
 	dispatcher.RegisterHandler(func(message *openwechat.Message) bool {
 		return message.IsSendByGroup()
 	}, GroupMessageContextHandler())
+
+	// TODO: 处理私聊，是否自动回复
 
 	// 好友申请
 	dispatcher.RegisterHandler(func(message *openwechat.Message) bool {
