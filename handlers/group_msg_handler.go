@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/eatmoreapple/openwechat"
-	"github.com/qingconglaixueit/wechatbot/gpt"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
-	"github.com/qingconglaixueit/wechatbot/service"
 	"strings"
+
+	"github.com/eatmoreapple/openwechat"
+	"github.com/lushenle/wechatbot/gpt"
+	"github.com/lushenle/wechatbot/pkg/logger"
+	"github.com/lushenle/wechatbot/service"
 )
 
 var _ MessageHandlerInterface = (*GroupMessageHandler)(nil)
@@ -103,7 +103,7 @@ func (g *GroupMessageHandler) ReplyText() error {
 		errMsg := fmt.Sprintf("gpt request error: %v", err)
 		_, err = g.msg.ReplyText(errMsg)
 		if err != nil {
-			return errors.New(fmt.Sprintf("response group error: %v ", err))
+			return fmt.Errorf("response group error: %v ", err)
 		}
 		return err
 	}
@@ -112,7 +112,7 @@ func (g *GroupMessageHandler) ReplyText() error {
 	g.service.SetUserSessionContext(requestText, reply)
 	_, err = g.msg.ReplyText(g.buildReplyText(reply))
 	if err != nil {
-		return errors.New(fmt.Sprintf("response user error: %v ", err))
+		return fmt.Errorf("response user error: %v ", err)
 	}
 
 	// 5.返回错误信息
@@ -122,12 +122,11 @@ func (g *GroupMessageHandler) ReplyText() error {
 // getRequestText 获取请求接口的文本，要做一些清洗
 func (g *GroupMessageHandler) getRequestText() string {
 	// 1.去除空格以及换行
-	requestText := strings.TrimSpace(g.msg.Content)
-	requestText = strings.Trim(g.msg.Content, "\n")
+	requestText := strings.Trim(strings.TrimSpace(g.msg.Content), "\n")
 
 	// 2.替换掉当前用户名称
 	replaceText := "@" + g.self.NickName
-	requestText = strings.TrimSpace(strings.ReplaceAll(g.msg.Content, replaceText, ""))
+	requestText = strings.TrimSpace(strings.ReplaceAll(requestText, replaceText, ""))
 	if requestText == "" {
 		return ""
 	}
@@ -142,12 +141,12 @@ func (g *GroupMessageHandler) getRequestText() string {
 	}
 
 	// 4.检查用户发送文本是否包含结束标点符号
-	punctuation := ",.;!?，。！？、…"
-	runeRequestText := []rune(requestText)
-	lastChar := string(runeRequestText[len(runeRequestText)-1:])
-	if strings.Index(punctuation, lastChar) < 0 {
-		requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免openai自动补齐引起混乱。
-	}
+	//punctuation := ",.;!?，。！？、…"
+	//runeRequestText := []rune(requestText)
+	//lastChar := string(runeRequestText[len(runeRequestText)-1:])
+	//if !strings.Contains(punctuation, lastChar) {
+	//	requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免 openai 自动补齐引起混乱。
+	//}
 
 	// 5.返回请求文本
 	return requestText

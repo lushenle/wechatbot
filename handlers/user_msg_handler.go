@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
-	"github.com/eatmoreapple/openwechat"
-	"github.com/qingconglaixueit/wechatbot/config"
-	"github.com/qingconglaixueit/wechatbot/gpt"
-	"github.com/qingconglaixueit/wechatbot/pkg/logger"
-	"github.com/qingconglaixueit/wechatbot/service"
 	"strings"
+
+	"github.com/eatmoreapple/openwechat"
+	"github.com/lushenle/wechatbot/config"
+	"github.com/lushenle/wechatbot/gpt"
+	"github.com/lushenle/wechatbot/pkg/logger"
+	"github.com/lushenle/wechatbot/service"
 )
 
 var _ MessageHandlerInterface = (*UserMessageHandler)(nil)
@@ -84,7 +84,7 @@ func (h *UserMessageHandler) ReplyText() error {
 		errMsg := fmt.Sprintf("gpt request error: %v", err)
 		_, err = h.msg.ReplyText(errMsg)
 		if err != nil {
-			return errors.New(fmt.Sprintf("response user error: %v ", err))
+			return fmt.Errorf("response user error: %v ", err)
 		}
 		return err
 	}
@@ -93,7 +93,7 @@ func (h *UserMessageHandler) ReplyText() error {
 	h.service.SetUserSessionContext(requestText, reply)
 	_, err = h.msg.ReplyText(buildUserReply(reply))
 	if err != nil {
-		return errors.New(fmt.Sprintf("response user error: %v ", err))
+		return fmt.Errorf("response user error: %v ", err)
 	}
 
 	// 3.返回错误
@@ -103,8 +103,7 @@ func (h *UserMessageHandler) ReplyText() error {
 // getRequestText 获取请求接口的文本，要做一些清晰
 func (h *UserMessageHandler) getRequestText() string {
 	// 1.去除空格以及换行
-	requestText := strings.TrimSpace(h.msg.Content)
-	requestText = strings.Trim(h.msg.Content, "\n")
+	requestText := strings.Trim(strings.TrimSpace(h.msg.Content), "\n")
 
 	// 2.获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
 	sessionText := h.service.GetUserSessionContext()
@@ -119,7 +118,7 @@ func (h *UserMessageHandler) getRequestText() string {
 	punctuation := ",.;!?，。！？、…"
 	runeRequestText := []rune(requestText)
 	lastChar := string(runeRequestText[len(runeRequestText)-1:])
-	if strings.Index(punctuation, lastChar) < 0 {
+	if !strings.Contains(punctuation, lastChar) {
 		requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免openai自动补齐引起混乱。
 	}
 
