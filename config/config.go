@@ -34,6 +34,9 @@ type Configuration struct {
 	SessionClearToken string `json:"session_clear_token"`
 	// Proxy Forward-proxy
 	//Proxy string `json:"proxy"`
+
+	// PrivateTrigger private trigger words
+	PrivateTrigger string `json:"private_trigger"`
 }
 
 var config *Configuration

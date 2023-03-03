@@ -76,6 +76,12 @@ func (h *UserMessageHandler) ReplyText() error {
 		logger.Info("user message is null")
 		return nil
 	}
+
+	// TODO: 私聊没有前缀不处理
+	if !strings.Contains(requestText, config.LoadConfig().PrivateTrigger) {
+		return nil
+	}
+
 	logger.Info(fmt.Sprintf("h.sender.NickName == %+v", h.sender.NickName))
 	// 2.向GPT发起请求，如果回复文本等于空,不回复
 	reply, err = gpt.Completions(h.getRequestText())
