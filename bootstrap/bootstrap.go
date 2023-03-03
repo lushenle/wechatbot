@@ -15,7 +15,7 @@ func Run() {
 	// 注册消息处理函数
 	handler, err := handlers.NewHandler()
 	if err != nil {
-		logger.Danger("register error: %v", err)
+		logger.Danger(fmt.Sprintf("register error: %v", err))
 		return
 	}
 	bot.MessageHandler = handler
