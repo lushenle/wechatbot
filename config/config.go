@@ -53,21 +53,20 @@ func LoadConfig() *Configuration {
 		}
 
 		// 判断配置文件是否存在，存在直接JSON读取
-		_, err := os.Stat("config.json")
+		_, err := os.Stat("conf/config.json")
 		if err == nil {
-			f, err := os.Open("config.json")
+			f, err := os.Open("conf/config.json")
 			if err != nil {
 				log.Fatalf("open config err: %v", err)
-				return
 			}
 			defer f.Close()
 			encoder := json.NewDecoder(f)
 			err = encoder.Decode(config)
 			if err != nil {
 				log.Fatalf("decode config err: %v", err)
-				return
 			}
 		}
+
 		// 有环境变量使用环境变量
 		Api := os.Getenv("APIKEY")
 		ApiKey := os.Getenv("API")
@@ -75,7 +74,7 @@ func LoadConfig() *Configuration {
 		SessionTimeout := os.Getenv("SESSION_TIMEOUT")
 		Model := os.Getenv("MODEL")
 		MaxTokens := os.Getenv("MAX_TOKENS")
-		Temperature := os.Getenv("TEMPREATURE")
+		Temperature := os.Getenv("TEMPERATURE")
 		ReplyPrefix := os.Getenv("REPLY_PREFIX")
 		SessionClearToken := os.Getenv("SESSION_CLEAR_TOKEN")
 		//Proxy := os.Getenv("HTTP_PROXY")
