@@ -156,11 +156,6 @@ func (g *GroupMessageHandler) getRequestText() string {
 func (g *GroupMessageHandler) buildReplyText(reply string) string {
 	// 1.获取@我的用户
 	atText := "@" + g.sender.NickName
-	textSplit := strings.Split(reply, "\n\n")
-	if len(textSplit) > 1 {
-		trimText := textSplit[0]
-		reply = strings.Trim(reply, trimText)
-	}
 	reply = strings.TrimSpace(reply)
 	if reply == "" {
 		return atText + " 请求得不到任何有意义的回复，请具体提出问题。"

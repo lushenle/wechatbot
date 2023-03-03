@@ -128,14 +128,6 @@ func (h *UserMessageHandler) getRequestText() string {
 
 // buildUserReply 构建用户回复
 func buildUserReply(reply string) string {
-	// 1.去除空格问号以及换行号，如果为空，返回一个默认值提醒用户
-	textSplit := strings.Split(reply, "\n\n")
-	if len(textSplit) > 1 {
-		trimText := textSplit[0]
-		reply = strings.Trim(reply, trimText)
-	}
-	reply = strings.TrimSpace(reply)
-
 	reply = strings.TrimSpace(reply)
 	if reply == "" {
 		return "请求得不到任何有意义的回复，请具体提出问题。"
