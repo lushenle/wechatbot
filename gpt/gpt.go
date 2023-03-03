@@ -86,10 +86,11 @@ type ChatGPTRequestBody struct {
 //	}
 func Completions(msg string) (string, error) {
 	cfg := config.LoadConfig()
-	promt := Message{Role: "user", Content: msg}
 	requestBody := ChatGPTRequestBody{
-		Model:            cfg.Model,
-		Prompt:           []Message{promt},
+		Model: cfg.Model,
+		Prompt: []Message{
+			{Role: "user", Content: msg},
+		},
 		MaxTokens:        cfg.MaxTokens,
 		Temperature:      cfg.Temperature,
 		TopP:             1,
@@ -102,7 +103,7 @@ func Completions(msg string) (string, error) {
 		return "", err
 	}
 	logger.Info(fmt.Sprintf("request gpt json string : %v", string(requestData)))
-	req, err := http.NewRequest("POST", cfg.API+"completions", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", cfg.API, bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
 	}
@@ -110,6 +111,11 @@ func Completions(msg string) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	// Setting the proxy and timeout duration
+	//proxy, _ := url.Parse("http://host:port")
+	//proxy, _ := url.Parse(cfg.Proxy)
+	//client = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxy)}}
 	client := &http.Client{Timeout: 30 * time.Second}
 	response, err := client.Do(req)
 	if err != nil {

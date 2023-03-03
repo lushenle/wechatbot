@@ -32,6 +32,8 @@ type Configuration struct {
 	ReplyPrefix string `json:"reply_prefix"`
 	// 清空会话口令
 	SessionClearToken string `json:"session_clear_token"`
+	// Proxy Forward-proxy
+	//Proxy string `json:"proxy"`
 }
 
 var config *Configuration
@@ -76,6 +78,10 @@ func LoadConfig() *Configuration {
 		Temperature := os.Getenv("TEMPREATURE")
 		ReplyPrefix := os.Getenv("REPLY_PREFIX")
 		SessionClearToken := os.Getenv("SESSION_CLEAR_TOKEN")
+		//Proxy := os.Getenv("HTTP_PROXY")
+		//if Proxy != "" {
+		//	config.Proxy = Proxy
+		//}
 		if Api != "" {
 			config.API = Api
 		}
