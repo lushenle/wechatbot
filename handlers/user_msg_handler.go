@@ -77,11 +77,6 @@ func (h *UserMessageHandler) ReplyText() error {
 		return nil
 	}
 
-	// TODO: 私聊没有前缀不处理
-	if !strings.Contains(requestText, config.LoadConfig().PrivateTrigger) {
-		return nil
-	}
-
 	logger.Info(fmt.Sprintf("h.sender.NickName == %+v", h.sender.NickName))
 	// 2.向GPT发起请求，如果回复文本等于空,不回复
 	reply, err = gpt.Completions(h.getRequestText())
@@ -108,8 +103,13 @@ func (h *UserMessageHandler) ReplyText() error {
 
 // getRequestText 获取请求接口的文本，要做一些清晰
 func (h *UserMessageHandler) getRequestText() string {
+	// 私聊没有前缀不处理
+	if !strings.Contains(h.msg.Content, config.LoadConfig().PrivateTrigger) {
+		return ""
+	}
 	// 1.去除空格以及换行
-	requestText := strings.Trim(strings.TrimSpace(h.msg.Content), "\n")
+	requestText := strings.TrimLeft(h.msg.Content, config.LoadConfig().PrivateTrigger)
+	requestText = strings.Trim(strings.TrimSpace(requestText), "\n")
 
 	// 2.获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
 	sessionText := h.service.GetUserSessionContext()
