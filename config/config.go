@@ -71,8 +71,8 @@ func LoadConfig() *Configuration {
 		}
 
 		// 有环境变量使用环境变量
-		Api := os.Getenv("APIKEY")
-		ApiKey := os.Getenv("API")
+		Api := os.Getenv("API")
+		ApiKey := os.Getenv("APIKEY")
 		AutoPass := os.Getenv("AUTO_PASS")
 		SessionTimeout := os.Getenv("SESSION_TIMEOUT")
 		Model := os.Getenv("MODEL")
