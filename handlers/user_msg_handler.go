@@ -103,13 +103,16 @@ func (h *UserMessageHandler) ReplyText() error {
 
 // getRequestText 获取请求接口的文本，要做一些清晰
 func (h *UserMessageHandler) getRequestText() string {
+	var requestText string
 	// 私聊没有前缀不处理
-	if !strings.Contains(h.msg.Content, config.LoadConfig().PrivateTrigger) {
+	if !strings.Contains(strings.ToLower(h.msg.Content), config.LoadConfig().PrivateTrigger) {
 		return ""
+	} else {
+		requestText = strings.ToLower(h.msg.Content)
+		requestText = strings.TrimLeft(requestText, config.LoadConfig().PrivateTrigger)
+		requestText = strings.Trim(strings.TrimSpace(requestText), "\n")
 	}
 	// 1.去除空格以及换行
-	requestText := strings.TrimLeft(h.msg.Content, config.LoadConfig().PrivateTrigger)
-	requestText = strings.Trim(strings.TrimSpace(requestText), "\n")
 
 	// 2.获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
 	sessionText := h.service.GetUserSessionContext()
@@ -121,12 +124,12 @@ func (h *UserMessageHandler) getRequestText() string {
 	}
 
 	// 3.检查用户发送文本是否包含结束标点符号
-	punctuation := ",.;!?，。！？、…"
-	runeRequestText := []rune(requestText)
-	lastChar := string(runeRequestText[len(runeRequestText)-1:])
-	if !strings.Contains(punctuation, lastChar) {
-		requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免openai自动补齐引起混乱。
-	}
+	//punctuation := ",.;!?，。！？、…"
+	//runeRequestText := []rune(requestText)
+	//lastChar := string(runeRequestText[len(runeRequestText)-1:])
+	//if !strings.Contains(punctuation, lastChar) {
+	//	requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免openai自动补齐引起混乱。
+	//}
 
 	// 4.返回请求文本
 	return requestText
