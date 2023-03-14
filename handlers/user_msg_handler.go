@@ -105,6 +105,8 @@ func (h *UserMessageHandler) ReplyText() error {
 func (h *UserMessageHandler) getRequestText() string {
 	var requestText string
 	// 私聊没有前缀不处理
+	// 处理前缀大小写，将消息全部转换为小写
+	// 去除空格和换行
 	if !strings.Contains(strings.ToLower(h.msg.Content), config.LoadConfig().PrivateTrigger) {
 		return ""
 	} else {
@@ -112,9 +114,8 @@ func (h *UserMessageHandler) getRequestText() string {
 		requestText = strings.TrimLeft(requestText, config.LoadConfig().PrivateTrigger)
 		requestText = strings.Trim(strings.TrimSpace(requestText), "\n")
 	}
-	// 1.去除空格以及换行
 
-	// 2.获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
+	// 获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
 	sessionText := h.service.GetUserSessionContext()
 	if sessionText != "" {
 		requestText = sessionText + "\n" + requestText
@@ -123,15 +124,7 @@ func (h *UserMessageHandler) getRequestText() string {
 		requestText = requestText[:4000]
 	}
 
-	// 3.检查用户发送文本是否包含结束标点符号
-	//punctuation := ",.;!?，。！？、…"
-	//runeRequestText := []rune(requestText)
-	//lastChar := string(runeRequestText[len(runeRequestText)-1:])
-	//if !strings.Contains(punctuation, lastChar) {
-	//	requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免openai自动补齐引起混乱。
-	//}
-
-	// 4.返回请求文本
+	// 返回请求文本
 	return requestText
 }
 
