@@ -27,8 +27,7 @@
 # 常见问题
 * 如无法登录 login error: write storage.json: bad file descriptor 删除掉storage.json文件重新登录。
 * 如无法登录 login error: WeChat network error: Get "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage": 301 response missing Location header 一般是微信登录权限问题，先确保PC端能否正常登录。
-* 其他无法登录问题，依然尝试删除掉storage.json文件，结束进程(linux一般是kill -9 进程id)之后重启程序，重新扫码登录，(如为docket部署，Supervisord进程管理工具会自动重启程序)。
-* ~~机器人无法正常回复，检查ApiKey能否正常使用，控制台日志中有详细错误信息~~ 新版本会机器人会直接输出，因为被问得好烦了。
+* 其他无法登录问题，依然尝试删除掉storage.json文件，结束进程(linux一般是kill -9 进程id)之后重启程序，重新扫码登录，(如为docker部署，Supervisord进程管理工具会自动重启程序)。
 * linux中二维码无法扫描，缩小命令行功能，让二维码像素尽可能清晰。（无法从代码层面解决）
 * 机器人一直答非所问，可能因为上下文累积过多。切换不同问题时，发送指令：启动时配置的`session_clear_token`字段。会清空上下文
 
@@ -47,48 +46,24 @@
 
 你可以使用docker快速运行本项目。
 
-`第一种：基于环境变量运行`
-
-```sh
-# 运行项目，环境变量参考下方配置说明
-$ docker run -d --name wechatbot --restart=always \
- -e API="https://api.openai.com/v1/chat/completions"
- -e APIKEY=换成你的key \
- -e AUTO_PASS=false \
- -e SESSION_TIMEOUT=60s \
- -e MODEL=text-davinci-003 \
- -e MAX_TOKENS=512 \
- -e TEMPREATURE=0.9 \
- -e REPLY_PREFIX=我是来自机器人回复: \
- -e SESSION_CLEAR_TOKEN=下一个问题 \
-  manunkind/wechatbot:latest
-
-# 查看二维码
-$ docker exec -it wechatbot bash 
-$ tail -f -n 50 /app/run.log 
-```
-
-运行命令中映射的配置文件参考下边的配置文件说明。
-
-`第二种：基于配置文件挂载运行`
-
 ```sh
 # 复制配置文件，根据自己实际情况，调整配置里的内容
 $ cp config.dev.json config.json  # 其中 config.dev.json 从项目的根目录获取
 
 # 运行项目
-$ docker run -itd --name wechatbot -v `pwd`/config.json:/app/config.json docker.mirrors.sjtug.sjtu.edu.cn/qingshui869413421/wechatbot:latest
+$ docker run -d --name wechatbot --restart=always \
+  -v ${PWD}/config.json:/app/conf/config.json \
+  maunkind/wechatbot:latest
 
 # 查看二维码
-$ docker exec -it wechatbot bash 
-$ tail -f -n 50 /app/run.log 
+$ docker exec -it wechatbot tail -f -n 50 /app/run.log 
 ```
 
 其中配置文件参考下边的配置文件说明。
 
 # 快速开始
 
-````
+```bash
 # 获取项目
 $ git clone https://github.com/lushenle/wechatbot.git
 
@@ -96,17 +71,16 @@ $ git clone https://github.com/lushenle/wechatbot.git
 $ cd wechatbot
 
 # 复制配置文件
-$ copy config.dev.json config.json
+$ copy config.dev.json conf/config.json
 
 # 启动项目
 $ go run main.go
-````
+```
 
 # 配置文件说明
 
-````
+```josn
 {
-  "api": "https://api.openai.com/v1/chat/completions",
   "api_key": "your api key",
   "auto_pass": true,
   "session_timeout": 60,
@@ -116,13 +90,13 @@ $ go run main.go
   "reply_prefix": "来自机器人回复：",
   "session_clear_token": "清空会话"
 }
+```
 
-api_key：openai api_key
-auto_pass:是否自动通过好友添加
-session_timeout：会话超时时间，默认60秒，单位秒，在会话时间内所有发送给机器人的信息会作为上下文。
-max_tokens: GPT响应字符数，最大2048，默认值512。max_tokens会影响接口响应速度，字符越大响应越慢。
-model: GPT选用模型，默认 gpt-3.5-turbo, 具体选项参考官网训练场
-temperature: GPT热度，0到1，默认0.9。数字越大创造力越强，但更偏离训练事实，越低越接近训练事实
-reply_prefix: 私聊回复前缀
-session_clear_token: 会话清空口令，默认`下一个问题`
-````
+- api_key：openai api_key
+- auto_pass:是否自动通过好友添加
+- session_timeout：会话超时时间，默认60秒，单位秒，在会话时间内所有发送给机器人的信息会作为上下文。
+- max_tokens: GPT响应字符数，最大2048，默认值512。max_tokens会影响接口响应速度，字符越大响应越慢。
+- model: GPT选用模型，默认 gpt-3.5-turbo, 具体选项参考官网训练场
+- temperature: GPT热度，0到1，默认0.9。数字越大创造力越强，但更偏离训练事实，越低越接近训练事实
+- reply_prefix: 私聊回复前缀
+- session_clear_token: 会话清空口令，默认`下一个问题`

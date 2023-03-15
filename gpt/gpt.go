@@ -13,10 +13,7 @@ import (
 )
 
 func Completions(msg string) (string, error) {
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		return "", err
-	}
+	cfg := config.LoadConfig()
 
 	if msg == "" {
 		return "", fmt.Errorf("request messages required")
