@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"log"
-	"runtime"
 	"strings"
 	"time"
 
@@ -24,16 +23,10 @@ type MessageHandlerInterface interface {
 
 // QrCodeCallBack 登录扫码回调，
 func QrCodeCallBack(uuid string) {
-	if runtime.GOOS == "windows" {
-		// 运行在Windows系统上
-		openwechat.PrintlnQrcodeUrl(uuid)
-	} else {
-		log.Println("login in linux")
-		url := "https://login.weixin.qq.com/l/" + uuid
-		log.Printf("如果二维码无法扫描，请缩小控制台尺寸，或更换命令行工具，缩小二维码像素")
-		q, _ := qrcode.New(url, qrcode.High)
-		fmt.Println(q.ToSmallString(true))
-	}
+	url := "https://login.weixin.qq.com/l/" + uuid
+	log.Printf("如果二维码无法扫描，请缩小控制台尺寸，或更换命令行工具，缩小二维码像素")
+	q, _ := qrcode.New(url, qrcode.High)
+	fmt.Println(q.ToSmallString(true))
 }
 
 func NewHandler() (msgFunc func(msg *openwechat.Message), err error) {
@@ -48,8 +41,6 @@ func NewHandler() (msgFunc func(msg *openwechat.Message), err error) {
 	dispatcher.RegisterHandler(func(message *openwechat.Message) bool {
 		return message.IsSendByGroup()
 	}, GroupMessageContextHandler())
-
-	// TODO: 处理私聊，是否自动回复
 
 	// 好友申请
 	dispatcher.RegisterHandler(func(message *openwechat.Message) bool {

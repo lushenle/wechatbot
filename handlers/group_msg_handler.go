@@ -121,17 +121,17 @@ func (g *GroupMessageHandler) ReplyText() error {
 
 // getRequestText 获取请求接口的文本，要做一些清洗
 func (g *GroupMessageHandler) getRequestText() string {
-	// 1.去除空格以及换行
+	// 去除空格以及换行
 	requestText := strings.Trim(strings.TrimSpace(g.msg.Content), "\n")
 
-	// 2.替换掉当前用户名称
+	// 替换掉当前用户名称
 	replaceText := "@" + g.self.NickName
 	requestText = strings.TrimSpace(strings.ReplaceAll(requestText, replaceText, ""))
 	if requestText == "" {
 		return ""
 	}
 
-	// 3.获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
+	// 获取上下文，拼接在一起，如果字符长度超出4000，截取为4000。（GPT按字符长度算），达芬奇3最大为4068，也许后续为了适应要动态进行判断。
 	sessionText := g.service.GetUserSessionContext()
 	if sessionText != "" {
 		requestText = sessionText + "\n" + requestText
@@ -140,15 +140,7 @@ func (g *GroupMessageHandler) getRequestText() string {
 		requestText = requestText[:4000]
 	}
 
-	// 4.检查用户发送文本是否包含结束标点符号
-	//punctuation := ",.;!?，。！？、…"
-	//runeRequestText := []rune(requestText)
-	//lastChar := string(runeRequestText[len(runeRequestText)-1:])
-	//if !strings.Contains(punctuation, lastChar) {
-	//	requestText = requestText + "？" // 判断最后字符是否加了标点，没有的话加上句号，避免 openai 自动补齐引起混乱。
-	//}
-
-	// 5.返回请求文本
+	// 返回请求文本
 	return requestText
 }
 
